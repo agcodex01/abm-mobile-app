@@ -1,1 +1,12 @@
 // app global css in SCSS form
+.btn-rounded {
+  border-radius: 10px !important;
+}
+
+.app-dialog-button-padding {
+  padding: 8px 48px !important;
+}
+
+.clickable {
+  cursor: pointer !important;
+}
