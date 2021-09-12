@@ -1,4 +1,4 @@
-const Biller = require('./billers')
+import { api } from 'src/boot/axios'
 
 export default {
   namespaced: true,
@@ -17,8 +17,16 @@ export default {
     getBiller: state => state.biller
   },
   actions: {
-    getBillers: ({ commit }) => commit('SET_BILLERS', Biller.all()),
-    getBillerById: ({ commit }, id) => commit('SET_BILLER', Biller.findById(id)),
+    getBillers: async ({ commit }) => {
+      await api.get('/billers').then(({ data }) => {
+        commit('SET_BILLERS', data)
+      })
+    },
+    getBillerById: async ({ commit }, id) => {
+      await api.get(`/billers/${id}`).then(({ data }) => {
+        commit('SET_BILLER', data)
+      })
+    },
     setNewStringSearch: ({ commit }, searchString) => commit('SET_BILLER_SEARCH', searchString)
   },
   mutations: {

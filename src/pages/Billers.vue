@@ -23,7 +23,7 @@
           }">
         <q-item-section avatar>
           <q-avatar color="primary" text-color="white">
-            {{ biller.type }}
+            {{ biller.type[0].toUpperCase() }}
           </q-avatar>
         </q-item-section>
 
@@ -56,9 +56,11 @@ export default {
     })
   },
 
-  mounted () {
-    this.$store.dispatch('billers/getBillers')
+  async mounted () {
     this.$store.commit('layout/SET_HEADER', 'Billers')
+    this.$q.loading.show()
+    await this.$store.dispatch('billers/getBillers')
+    this.$q.loading.hide()
   }
 }
 </script>

@@ -18,6 +18,9 @@
           >Billing Machine</q-item-label
         >
       </q-item-section>
+      <q-item-section avatar  @click="$router.push({name: 'options'})">
+          <q-avatar size="96px"  text-color="white" icon="settings" />
+        </q-item-section>
     </q-item>
       </q-list>
     </div>
