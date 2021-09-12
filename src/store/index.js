@@ -1,8 +1,11 @@
 import { store } from 'quasar/wrappers'
 import { createStore } from 'vuex'
 
-import billers from './modules/billers/index'
-import layout from './modules/layout/index'
+import accounts from './modules/accounts'
+import billers from './modules/billers'
+import layout from './modules/layout'
+import units from './modules/unit'
+import transactions from './modules/transaction'
 
 /*
  * If not building with SSR mode, you can
@@ -16,8 +19,11 @@ import layout from './modules/layout/index'
 export default store(function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
+      accounts,
       billers,
-      layout
+      layout,
+      units,
+      transactions
     },
 
     // enable strict mode (adds overhead!)
