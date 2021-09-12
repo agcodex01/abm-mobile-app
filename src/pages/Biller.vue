@@ -77,7 +77,7 @@
               <div class="text-subtitle2">Payment Inserted</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ insertedPayment }}</div>
+              <div class="text-subtitle2">: {{ transaction.insertedAmount }}</div>
             </div>
           </div>
           </div>
