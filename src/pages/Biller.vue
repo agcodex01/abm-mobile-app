@@ -100,36 +100,23 @@
         </q-card-section>
         <hr>
         <q-card-section class="row">
-          <div class="col-4">
-              <div class="text-subtitle1 text-bold q-mb-md">Info </div>
-             <div class="text-subtitle2">Amount </div>
-             <p>P {{ transaction.amount }}</p>
-             <div class="text-subtitle2">Payment</div>
-             <p> P {{ transaction.insertedAmount }}</p>
-             <div class="text-subtitle2 flex justify-between">
-               Balance
-               <q-btn v-show="account.balance" size="xs" color="primary" label="Use" @click="onUseAccountBalance"/>
-              </div>
-             <p> P {{ account.balance }}</p>
-             <div class="text-center q-mb-lg" v-show="insertingPayment">
+          <div class="col-4 text-center">
+             <div class="text-h6 q-mb-md">Amount </div>
+             <div class="text-subtitle1" style="font-size:24px"> {{ transaction.amount }} </div>
+          </div>
+          <div class="col-4 text-center">
+             <div class="text-h6 q-mb-md">Balance </div>
+             <div class="text-subtitle1" style="font-size:24px"> {{ account.balance }} </div>
+          </div>
+          <div class="col-4 text-center">
+             <div class="text-h6 q-mb-md">Payment </div>
+             <div class="text-subtitle1" style="font-size:24px"> {{ transaction.insertedAmount }} </div>
+          </div>
+          <div class="col-12 q-mt-lg">
+            <div class="text-center q-mb-lg" v-show="insertingPayment">
                 <q-spinner-ios color="primary" size="3em"/>
                 <p>Inserting payment in progress...</p>
-              </div>
-          </div>
-          <div class="col-8 q-pl-lg">
-              <div class="text-subtitle1 text-bold q-mb-md">Options: </div>
-              <div class="row justify-center  q-gutter-lg">
-                <q-btn
-                  round
-                  size="24px"
-                  color="primary"
-                  :disable="insertingPayment"
-                  @click="addPayment(n)"
-                  :label="n"
-                  v-for="n in money"
-                  :key="`xs-${n}`"
-                  />
-              </div>
+            </div>
           </div>
         </q-card-section>
       </q-card>
@@ -231,6 +218,12 @@ export default {
     }
   },
   async mounted () {
+    this.$socket.on('connect', function () {
+      this.$socket.on('insertPayment', (amount) => {
+        this.addPayment(amount)
+      })
+    })
+
     await this.$store.dispatch('billers/getBillerById', this.$route.params.id)
     this.$store.commit('layout/SET_HEADER', this.biller.name)
     this.transaction.unit_id = this.unitId
