@@ -9,7 +9,7 @@
         </q-item-section>
 
         <q-item-section>
-          <q-item-label lines="1">Set Unit UUID</q-item-label>
+          <q-item-label lines="1">Config</q-item-label>
           <q-item-label caption>This will be the bases where the transactions came from.</q-item-label>
         </q-item-section>
 

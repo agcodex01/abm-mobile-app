@@ -219,9 +219,10 @@ export default {
   },
   async mounted () {
     this.$socket.on('connect', function () {
-      this.$socket.on('insertPayment', (amount) => {
-        this.addPayment(amount)
-      })
+      console.log('CONNECTED TO SIMULATOR')
+    })
+    this.$socket.on('insertPayment', (amount) => {
+      this.addPayment(amount)
     })
 
     await this.$store.dispatch('billers/getBillerById', this.$route.params.id)

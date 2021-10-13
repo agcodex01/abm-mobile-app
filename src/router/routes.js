@@ -23,9 +23,9 @@ const routes = [
         component: () => import('pages/setup/Options.vue')
       },
       {
-        path: 'options/set-device-uuid',
+        path: 'options/config',
         name: 'set_device_uuid',
-        component: () => import('pages/setup/SetDeviceUuid.vue')
+        component: () => import('src/pages/setup/Config.vue')
       }
     ]
   },
