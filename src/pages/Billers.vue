@@ -60,7 +60,9 @@ export default {
     this.$store.commit('layout/SET_HEADER', 'Billers')
     this.$q.loading.show()
     await this.$store.dispatch('billers/getBillers')
-    this.$q.loading.hide()
+      .finally(() => {
+        this.$q.loading.hide()
+      })
   }
 }
 </script>

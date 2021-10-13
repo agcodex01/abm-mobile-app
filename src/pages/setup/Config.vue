@@ -7,7 +7,8 @@
           @reset="onReset"
           class="q-gutter-md"
         >
-        <q-input v-model="unitId" type="text" label="UUID" stack-label placeholder="Enter Unit uuid here..." />
+        <q-input v-model="unitId" type="text" label="UUID" stack-label placeholder="Enter unit uuid here..." />
+        <q-input v-model="token" type="text" label="Token" stack-label placeholder="Enter unit token here..." />
           <div class="q-gutter-sm">
             <q-btn label="Save" type="submit" color="primary" />
             <q-btn label="Reset" type="reset" color="negative" outline />
@@ -21,28 +22,42 @@
 import { mapActions, mapGetters } from 'vuex'
 export default {
   data: () => ({
-    unitId: ''
+    unitId: '',
+    token: ''
   }),
   methods: {
     ...mapActions({
-      setUnitId: 'units/setUnitId'
+      setConfig: 'units/SET_CONFIG'
     }),
     onSave () {
-      this.setUnitId(this.unitId)
+      this.setConfig({
+        unitId: this.unitId,
+        token: this.token
+      })
+      this.$q.notify({
+        position: 'top',
+        type: 'positive',
+        message: 'Config saved succcessfully.'
+      })
     },
     onReset () {
       this.unitId = ''
-      this.setUnitId('')
+      this.setConfig({
+        unitId: null,
+        token: null
+      })
     }
   },
   computed: {
     ...mapGetters({
-      storeUnitId: 'units/getUnitId'
+      storeUnitId: 'units/getUnitId',
+      storeToken: 'units/getToken'
     })
   },
   mounted () {
-    this.$store.commit('layout/SET_HEADER', 'Set Unit UUID')
+    this.$store.commit('layout/SET_HEADER', 'Unit Config')
     this.unitId = this.storeUnitId
+    this.token = this.storeToken
   }
 }
 </script>
