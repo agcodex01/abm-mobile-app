@@ -6,6 +6,7 @@ import billers from './modules/billers'
 import layout from './modules/layout'
 import units from './modules/unit'
 import transactions from './modules/transaction'
+import settings from './modules/setting'
 
 /*
  * If not building with SSR mode, you can
@@ -22,6 +23,7 @@ export default store(function (/* { ssrContext } */) {
       accounts,
       billers,
       layout,
+      settings,
       units,
       transactions
     },

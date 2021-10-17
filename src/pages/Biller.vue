@@ -2,10 +2,10 @@
   <q-page padding class="q-mx-auto q-mt-none" style="width:700px; heigth:100%">
     <div class="text-center">
       <h4 class="title">Payments Requirement</h4>
-      <h6>Transaction Fee : P 400.00</h6>
+      <h6>Transaction Fee : P {{ setting?.fee }}</h6>
     </div>
     <q-form
-      @submit="onConfirm"
+      @submit="confirm"
       class="q-gutter-md"
     >
       <q-input
@@ -45,7 +45,7 @@
     <q-dialog v-model="transactionDialog" persistent>
       <q-card class="q-pb-lg q-pt-sm" style="width:400px;">
         <q-card-section class="q-pa-none">
-          <h4 align="center" v-if="creatingTransaction">Transaction Inprogress.</h4>
+          <h4 align="center" v-if="isCreatingTransaction">Transaction Inprogress.</h4>
           <h4 align="center" v-else>Transaction Completed.</h4>
           <div class="q-px-lg">
             <div class="row">
@@ -71,49 +71,49 @@
               <div class="text-subtitle2">Amount</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ transaction.amount }}</div>
+              <div class="text-subtitle2">: {{ amount }}</div>
             </div>
             <div class="col-4">
               <div class="text-subtitle2">Payment Inserted</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ transaction.insertedAmount }}</div>
+              <div class="text-subtitle2">: {{ insertedPayment }}</div>
             </div>
           </div>
           </div>
         </q-card-section>
-        <q-card-section class="text-center" v-show="creatingTransaction">
+        <q-card-section class="text-center" v-show="isCreatingTransaction">
           <q-spinner-ios color="primary" size="3em"/>
            <p>Creating transaction in progress...</p>
         </q-card-section>
-        <q-card-section class="text-center" v-show="!creatingTransaction">
+        <q-card-section class="text-center" v-show="!isCreatingTransaction">
           <q-icon name="task_alt" size="64px" color="positive" />
           <p class="q-mt-md">Sms message will be sent to your mobile number for confirmation.</p>
-          <q-btn color="primary" label="Close" class="full-width" v-close-popup/>
+          <q-btn color="primary" label="Close" class="full-width" @click="finishTransaction"/>
         </q-card-section>
       </q-card>
     </q-dialog>
     <q-dialog v-model="paymentDialog" persistent >
       <q-card class="q-px-lg q-pb-lg" style="min-width:640px">
-        <q-card-section class="q-mt-md text-center">
-          <div class="text-h4">Insert Payment</div>
+        <q-card-section class="q-pt-lg flex justify-between align-center">
+          <div class="text-h5 text-weight-regular no-margin">Insert Payment</div>
+          <q-btn v-if="account?.balance" color="primary" label="Use balance" :loading="usingBalance" @click="onUseAccountBalance"/>
         </q-card-section>
-        <hr>
         <q-card-section class="row">
           <div class="col-4 text-center">
              <div class="text-h6 q-mb-md">Amount </div>
-             <div class="text-subtitle1" style="font-size:24px"> {{ transaction.amount }} </div>
+             <div class="text-subtitle1" style="font-size:24px"> {{ transaction.amount || 0 }} </div>
           </div>
           <div class="col-4 text-center">
              <div class="text-h6 q-mb-md">Balance </div>
-             <div class="text-subtitle1" style="font-size:24px"> {{ account.balance }} </div>
+             <div class="text-subtitle1 q-mb-md" style="font-size:24px"> {{ account.balance || 0 }} </div>
           </div>
           <div class="col-4 text-center">
              <div class="text-h6 q-mb-md">Payment </div>
-             <div class="text-subtitle1" style="font-size:24px"> {{ transaction.insertedAmount }} </div>
+             <div class="text-subtitle1" style="font-size:24px"> {{ insertedPayment }} </div>
           </div>
           <div class="col-12 q-mt-lg">
-            <div class="text-center q-mb-lg" v-show="insertingPayment">
+            <div class="text-center q-mb-lg" v-show="isInsertingPayment">
                 <q-spinner-ios color="primary" size="3em"/>
                 <p>Inserting payment in progress...</p>
             </div>
@@ -134,101 +134,65 @@ export default {
       account_id: null,
       service_number: null,
       number: null,
-      amount: 0,
-      insertedAmount: 0,
-      status: 'pending'
+      amount: 0
     },
-    askDialog: false,
-    paymentDialog: false,
-    transactionDialog: false,
-    creatingTransaction: false,
-    continue: true,
-    showConfiramtionDialog: false,
-    showPaymentDialog: false,
-    insertingPayment: false,
-    hasInserted: false,
-    insertedPayment: 0,
-    money: [1, 5, 10, 20, 50, 100, 200, 500, 1000]
+    usingBalance: false
   }),
   computed: {
     ...mapGetters({
       biller: 'billers/getBiller',
       unitId: 'units/getUnitId',
-      account: 'accounts/GET_ACCOUNT'
-    }),
-    canCreateTransaction () {
-      return this.hasInserted && this.transaction.insertedAmount >= this.transaction.amount
-    }
+      account: 'accounts/GET_ACCOUNT',
+      setting: 'settings/getSetting',
+      insertedPayment: 'transactions/getInsertedPayment',
+      amount: 'transactions/getInsertedAmount',
+      isInsertingPayment: 'transactions/isInsertingPayment',
+      paymentDialog: 'transactions/openPaymentDialog',
+      askDialog: 'transactions/openAskDialog',
+      transactionDialog: 'transactions/openTransactionDialog',
+      isCreatingTransaction: 'transactions/isCreatingTransaction'
+    })
   },
   methods: {
     ...mapActions({
-      useAccountBalance: 'accounts/USE_ACCOUNT_BALANCE'
+      useAccountBalance: 'accounts/USE_ACCOUNT_BALANCE',
+      finishTransaction: 'transactions/FINISH_TRANSACTION',
+      confirm: 'transactions/CONFIRM'
     }),
-    onConfirm () {
-      this.askDialog = true
-    },
     async onYes () {
-      this.askDialog = false
+      this.$store.commit('transactions/SET_ASK_DIALOG_STATUS', false)
       await this.$store.dispatch('accounts/GET_ACCOUNT_OR_CREATE', {
         biller_id: this.biller.id,
         service_number: this.transaction.service_number
       }).then(() => {
         this.transaction.account_id = this.account.id
+        this.transaction.amount = parseFloat(this.transaction.amount) + parseFloat(this.setting.fee)
+        this.$store.commit('transactions/SET_TRANSACTION_INFO', this.transaction)
+        this.$store.commit('transactions/SET_PAYMENT_DIALOG_STATUS', true)
       })
-      this.paymentDialog = true
-    },
-    async onCreate () {
-      this.askDialog = false
-      this.paymentDialog = false
-      this.transactionDialog = true
-      this.creatingTransaction = true
-      await this.$store.dispatch('transactions/CREATE_TRANSACTION', this.transaction)
-        .then(() => {
-          this.creatingTransaction = false
-          this.hasInserted = false
-          setTimeout(() => {
-            this.$router.push({ name: 'billers' })
-          }, 2000)
-        })
-    },
-    addPayment (n) {
-      this.hasInserted = true
-      this.insertingPayment = true
-      setTimeout(() => {
-        this.transaction.insertedAmount += n
-        this.createTransaction()
-        this.insertingPayment = false
-      }, 1000)
     },
     async onUseAccountBalance () {
+      this.usingBalance = true
       await this.useAccountBalance(this.account.id)
         .then(success => {
           if (success) {
-            this.transaction.insertedAmount += this.account.balance
-            this.hasInserted = true
-            this.createTransaction()
+            this.$store.dispatch('transactions/ADD_PAYMENT', this.account.balance)
             this.$store.commit('accounts/RESET_ACCOUNT_BALANCE')
           }
+        }).finally(() => {
+          this.usingBalance = false
         })
-    },
-    createTransaction () {
-      if (this.canCreateTransaction) {
-        this.onCreate()
-      }
     }
   },
   async mounted () {
-    this.$socket.on('connect', function () {
-      console.log('CONNECTED TO SIMULATOR')
-    })
-    this.$socket.on('insertPayment', (amount) => {
-      this.addPayment(amount)
-    })
-
     await this.$store.dispatch('billers/getBillerById', this.$route.params.id)
+    await this.$store.dispatch('settings/getSetting')
     this.$store.commit('layout/SET_HEADER', this.biller.name)
     this.transaction.unit_id = this.unitId
     this.transaction.biller_id = this.biller.id
+    window.addEventListener('ADD_PAYMENT', ({ detail }) => {
+      this.$store.dispatch('transactions/ADD_PAYMENT', detail)
+    })
   }
 }
 </script>
