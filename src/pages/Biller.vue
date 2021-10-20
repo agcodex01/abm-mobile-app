@@ -89,7 +89,7 @@
         <q-card-section class="text-center" v-show="!isCreatingTransaction">
           <q-icon name="task_alt" size="64px" color="positive" />
           <p class="q-mt-md">Sms message will be sent to your mobile number for confirmation.</p>
-          <q-btn color="primary" label="Close" class="full-width" @click="finishTransaction"/>
+          <q-btn color="primary" label="Close" class="full-width" @click="onFinishTransaction"/>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -182,6 +182,12 @@ export default {
         }).finally(() => {
           this.usingBalance = false
         })
+    },
+    onFinishTransaction () {
+      this.finishTransaction()
+      this.$router.push({
+        name: 'billers'
+      })
     }
   },
   async mounted () {

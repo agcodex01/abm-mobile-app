@@ -8,8 +8,11 @@ import { LocalStorage, Notify } from 'quasar'
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const baseURL = process.env.DEV ? 'https://abm-ser-dev.herokuapp.com' : 'https://abm-ser-dev.herokuapp.com'
-const api = axios.create({ baseURL: baseURL + '/api' })
+const baseURL = process.env.DEV
+  ? 'http://localhost:8000'
+  : 'https://abm-ser-dev.herokuapp.com'
+
+const api = axios.create({ baseURL: `${baseURL}/api` })
 
 api.interceptors.request.use(
   function (config) {
