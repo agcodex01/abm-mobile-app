@@ -2,15 +2,23 @@
 const routes = [
   {
     path: '/',
+    name: 'landing_page',
     component: () => import('pages/LandingPage.vue')
   },
   {
     path: '/billers',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      // { path: '', component: () => import('pages/Index.vue') },
-      { path: '', name: 'billers', component: () => import('pages/Billers.vue') },
-      { path: ':id', name: 'select_biller', component: () => import('pages/Biller.vue') }
+      {
+        path: '',
+        name: 'billers',
+        component: () => import('pages/Billers.vue')
+      },
+      {
+        path: ':id',
+        name: 'select_biller',
+        component: () => import('pages/Biller.vue')
+      }
     ]
   },
   {
@@ -24,7 +32,7 @@ const routes = [
       },
       {
         path: 'options/config',
-        name: 'set_device_uuid',
+        name: 'set_device_config',
         component: () => import('src/pages/setup/Config.vue')
       }
     ]

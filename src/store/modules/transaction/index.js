@@ -1,5 +1,4 @@
 import { api } from 'src/boot/axios'
-import router from 'src/router'
 
 export default {
   namespaced: true,
@@ -64,10 +63,10 @@ export default {
     },
     FINISH_TRANSACTION: ({ commit }) => {
       commit('SET_TRANSACTION_DIALOG_STATUS', false)
-      router().push({ name: 'billers' })
+      commit('SET_PAYMENT', 0)
     },
     CONFIRM: ({ commit }) => {
-      commit('transactions/SET_ASK_DIALOG_STATUS', true)
+      commit('SET_ASK_DIALOG_STATUS', true)
     }
   },
   mutations: {
