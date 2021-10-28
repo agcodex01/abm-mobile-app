@@ -131,6 +131,7 @@ export default {
     transaction: {
       unit_id: null,
       biller_id: null,
+      biller_name: null,
       account_id: null,
       service_number: null,
       number: null,
@@ -196,6 +197,7 @@ export default {
     this.$store.commit('layout/SET_HEADER', this.biller.name)
     this.transaction.unit_id = this.unitId
     this.transaction.biller_id = this.biller.id
+    this.transaction.biller_name = this.biller.name
     window.addEventListener('ADD_PAYMENT', ({ detail }) => {
       this.$store.dispatch('transactions/ADD_PAYMENT', detail)
     })
