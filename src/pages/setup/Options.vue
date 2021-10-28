@@ -3,7 +3,7 @@
     <q-list bordered padding class="rounded-borders" >
       <q-item-label header>Device</q-item-label>
 
-      <q-item clickable v-ripple :to="{name: 'set_device_uuid'}">
+      <q-item clickable v-ripple :to="{name: 'set_device_config'}">
         <q-item-section avatar top>
           <q-avatar icon="tablet" color="primary" text-color="white" />
         </q-item-section>
@@ -20,7 +20,7 @@
       <q-separator spaced />
       <q-item-label header>Transactions</q-item-label>
 
-      <q-item clickable v-ripple>
+      <q-item clickable v-ripple :to="{name: 'view_transaction_logs'}">
         <q-item-section avatar top>
           <q-avatar icon="assignment" color="grey" text-color="white" />
         </q-item-section>

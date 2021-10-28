@@ -1,4 +1,6 @@
 import { api } from 'src/boot/axios'
+import { LocalStorage } from 'quasar'
+import tableHeader from './transactions_logs'
 
 export default {
   namespaced: true,
@@ -13,14 +15,19 @@ export default {
       insertedAmount: 0,
       status: 'pending'
     },
+    biller_name: null,
     askDialog: false,
     paymentDialog: false,
     insertingPayment: false,
     transactionDialog: false,
-    creatingTransaction: false
+    creatingTransaction: false,
+    logs: JSON.parse(LocalStorage.getItem('transactionLogs') || '[]'),
+    tableHeader: tableHeader
   }),
   getters: {
     getTransaction: state => state.transaction,
+    getLogs: state => state.logs,
+    getBillerName: state => state.biller_name,
     getInsertedPayment: state => state.transaction.insertedAmount,
     getInsertedAmount: state => state.transaction.amount,
     canCreate: state => state.transaction.insertedAmount >= state.transaction.amount,
@@ -28,7 +35,8 @@ export default {
     openPaymentDialog: state => state.paymentDialog,
     openAskDialog: state => state.askDialog,
     openTransactionDialog: state => state.transactionDialog,
-    isCreatingTransaction: state => state.creatingTransaction
+    isCreatingTransaction: state => state.creatingTransaction,
+    getTableHeader: state => state.tableHeader
   },
   actions: {
     CREATE_TRANSACTION: async ({ commit, dispatch, getters }, transaction) => {
@@ -37,7 +45,15 @@ export default {
         .then(({ data }) => {
           commit('SET_TRANSACTION_CREATING_STATUS', false)
           commit('SET_TRANSACTION', { ...data, insertedAmount: getters.getInsertedPayment })
-        }).catch(errors => console.log(errors))
+          dispatch('SET_TRANSACTION_LOGS', { ...data, biller_name: getters.getBillerName, status: 'Success' })
+        }).catch(() => {
+          dispatch('SET_TRANSACTION_LOGS', { ...transaction, biller_name: getters.getBillerName, status: 'Failed' })
+        })
+    },
+    SET_TRANSACTION_LOGS: async ({ commit }, transactionLogs) => {
+      const logs = JSON.parse(LocalStorage.getItem('transactionLogs') || '[]')
+      logs.push(transactionLogs)
+      commit('SET_TRANSACTION_LOGS', logs)
     },
     ADD_PAYMENT: async ({ commit, getters, dispatch }, amount) => {
       const newAmount = getters.getInsertedPayment + amount
@@ -79,6 +95,7 @@ export default {
     SET_TRANSACTION_INFO: (state, info) => {
       state.transaction.unit_id = info.unit_id
       state.transaction.biller_id = info.biller_id
+      state.biller_name = info.biller_name
       state.transaction.service_number = info.service_number
       state.transaction.account_id = info.account_id
       state.transaction.number = info.number
@@ -98,6 +115,9 @@ export default {
     },
     SET_TRANSACTION_CREATING_STATUS: (state, status) => {
       state.creatingTransaction = status
+    },
+    SET_TRANSACTION_LOGS: (state, logs) => {
+      LocalStorage.set('transactionLogs', JSON.stringify(logs))
     }
   }
 }

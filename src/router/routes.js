@@ -1,4 +1,3 @@
-
 const routes = [
   {
     path: '/',
@@ -34,6 +33,11 @@ const routes = [
         path: 'options/config',
         name: 'set_device_config',
         component: () => import('src/pages/setup/Config.vue')
+      },
+      {
+        path: 'transaction/history_logs',
+        name: 'view_transaction_logs',
+        component: () => import('pages/transaction_logs/HistoryLogs.vue')
       }
     ]
   },
