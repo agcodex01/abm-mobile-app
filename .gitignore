@@ -31,3 +31,9 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+build.cordova.json
+abm-dev-key.jks
+abm-dev-key.jks.old
+abm-release-key.jks
+abm-release-key.jks.old

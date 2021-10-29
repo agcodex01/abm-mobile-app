@@ -198,9 +198,6 @@ export default {
     this.transaction.unit_id = this.unitId
     this.transaction.biller_id = this.biller.id
     this.transaction.biller_name = this.biller.name
-    window.addEventListener('ADD_PAYMENT', ({ detail }) => {
-      this.$store.dispatch('transactions/ADD_PAYMENT', detail)
-    })
   }
 }
 </script>
