@@ -11,7 +11,7 @@
     >
     <template v-slot:body-cell-status="props">
           <q-td :props="props" >
-            <q-badge :class="colorSetter(props)" class="q-pa-xs">
+            <q-badge :color="colorSetter(props.row.status)" class="q-pa-xs">
               {{ props.row.status }}
             </q-badge>
           </q-td>
@@ -38,8 +38,13 @@ export default {
     this.$store.commit('layout/SET_HEADER', 'History Logs')
   },
   methods: {
-    colorSetter (props) {
-      if (props.row.status === 'Success') { return 'bg-green' } return 'bg-red'
+    colorSetter (status) {
+      switch (status) {
+        case 'Success':
+          return 'positive'
+        case 'Failed':
+          return 'negative'
+      }
     }
   }
 }

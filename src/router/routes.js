@@ -11,11 +11,17 @@ const routes = [
       {
         path: '',
         name: 'billers',
+        meta: {
+          redirectTo: 'landing_page'
+        },
         component: () => import('pages/Billers.vue')
       },
       {
         path: ':id',
         name: 'select_biller',
+        meta: {
+          redirectTo: 'billers'
+        },
         component: () => import('pages/Biller.vue')
       }
     ]
@@ -27,16 +33,25 @@ const routes = [
       {
         path: '',
         name: 'options',
+        meta: {
+          redirectTo: 'landing_page'
+        },
         component: () => import('pages/setup/Options.vue')
       },
       {
         path: 'options/config',
         name: 'set_device_config',
+        meta: {
+          redirectTo: 'options'
+        },
         component: () => import('src/pages/setup/Config.vue')
       },
       {
         path: 'transaction/history_logs',
         name: 'view_transaction_logs',
+        meta: {
+          redirectTo: 'options'
+        },
         component: () => import('pages/transaction_logs/HistoryLogs.vue')
       }
     ]

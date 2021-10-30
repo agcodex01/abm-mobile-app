@@ -6,7 +6,7 @@
       <q-item-section avatar>
         <q-avatar>
           <img
-            src="https://www.adopisoft.com/assets/adopisoft-100px-logo-bordered-6a09c3ac6bcf48e4b0418882dd83f088ad8293e1161b168a0e42d2d6638169b7.png"
+            src="~assets/logo.png"
             width="200px"
             height="200px"
           />

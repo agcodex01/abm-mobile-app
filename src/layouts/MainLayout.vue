@@ -8,7 +8,7 @@
           round
           icon="chevron_left"
           aria-label="Menu"
-          @click="$router.back"
+          @click="redirectTo"
         />
         <q-toolbar-title v-text="header" />
       </q-toolbar>
@@ -23,6 +23,13 @@
 import { mapGetters } from 'vuex'
 export default {
   name: 'MainLayout',
+  methods: {
+    redirectTo () {
+      this.$router.push({
+        name: this.$route.meta.redirectTo
+      })
+    }
+  },
   computed: {
     ...mapGetters({
       header: 'layout/getHeader'
