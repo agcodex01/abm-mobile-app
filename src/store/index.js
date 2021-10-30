@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 
 import accounts from './modules/accounts'
 import billers from './modules/billers'
+import feedbacks from './modules/feedbacks'
 import layout from './modules/layout'
 import units from './modules/unit'
 import transactions from './modules/transaction'
@@ -22,6 +23,7 @@ export default store(function (/* { ssrContext } */) {
     modules: {
       accounts,
       billers,
+      feedbacks,
       layout,
       settings,
       units,

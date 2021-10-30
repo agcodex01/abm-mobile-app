@@ -45,27 +45,27 @@
     <q-dialog v-model="transactionDialog" persistent>
       <q-card class="q-pb-lg q-pt-sm" style="width:400px;">
         <q-card-section class="q-pa-none">
-          <h4 align="center" v-if="isCreatingTransaction">Transaction Inprogress.</h4>
-          <h4 align="center" v-else>Transaction Completed.</h4>
+          <h5 align="center" v-if="isCreatingTransaction">Transaction Inprogress.</h5>
+          <h5 align="center" v-else>Transaction Completed.</h5>
           <div class="q-px-lg">
             <div class="row">
             <div class="col-4">
               <div class="text-subtitle2">Biller</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ biller.name }}</div>
+              <div class="text-subtitle2">: {{ biller?.name }}</div>
             </div>
             <div class="col-4">
               <div class="text-subtitle2">Service Number</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ transaction.service_number }}</div>
+              <div class="text-subtitle2">: {{ transaction?.service_number }}</div>
             </div>
             <div class="col-4">
               <div class="text-subtitle2">Phone Number</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ transaction.number }}</div>
+              <div class="text-subtitle2">: {{ transaction?.number }}</div>
             </div>
             <div class="col-4">
               <div class="text-subtitle2">Amount</div>
@@ -89,6 +89,7 @@
         <q-card-section class="text-center" v-show="!isCreatingTransaction">
           <q-icon name="task_alt" size="64px" color="positive" />
           <p class="q-mt-md">Sms message will be sent to your mobile number for confirmation.</p>
+          <q-btn color="positive" label="Send Feedback" class="full-width q-mb-sm" outline @click="setFeedbackDialog(true)"/>
           <q-btn color="primary" label="Close" class="full-width" @click="onFinishTransaction"/>
         </q-card-section>
       </q-card>
@@ -121,9 +122,33 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="feedbackDialog" persistent >
+      <q-card class="q-px-lg q-pb-lg" style="min-width:640px">
+        <q-card-section class="q-pt-lg flex justify-between align-center">
+          <div class="text-h5 text-weight-regular no-margin">Feedback</div>
+        </q-card-section>
+        <q-form @submit="submitFeedback" ref="feedbackForm">
+          <q-card-section>
+            <q-input
+              v-model="message"
+              type="textarea"
+              label="Message"
+              outlined
+              lazy-rules
+              :rules="[val => !!val || 'Message is required.']"
+            />
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn color="primary" outline label="Close" padding="sm lg" @click="setFeedbackDialog(false)"/>
+            <q-btn type="submit" color="primary" label="Submit" padding="sm lg"/>
+          </q-card-actions>
+         </q-form>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 <script>
+import { Notify } from 'quasar'
 import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'Biller',
@@ -137,7 +162,8 @@ export default {
       number: null,
       amount: 0
     },
-    usingBalance: false
+    usingBalance: false,
+    message: null
   }),
   computed: {
     ...mapGetters({
@@ -151,14 +177,17 @@ export default {
       paymentDialog: 'transactions/openPaymentDialog',
       askDialog: 'transactions/openAskDialog',
       transactionDialog: 'transactions/openTransactionDialog',
-      isCreatingTransaction: 'transactions/isCreatingTransaction'
+      isCreatingTransaction: 'transactions/isCreatingTransaction',
+      feedbackDialog: 'feedbacks/getDialogState'
     })
   },
   methods: {
     ...mapActions({
       useAccountBalance: 'accounts/USE_ACCOUNT_BALANCE',
       finishTransaction: 'transactions/FINISH_TRANSACTION',
-      confirm: 'transactions/CONFIRM'
+      confirm: 'transactions/CONFIRM',
+      setFeedbackDialog: 'feedbacks/SET_DIALOG_STATE',
+      createFeedback: 'feedbacks/CREATE_FEEDBACK'
     }),
     async onYes () {
       this.$store.commit('transactions/SET_ASK_DIALOG_STATUS', false)
@@ -188,6 +217,24 @@ export default {
       this.finishTransaction()
       this.$router.push({
         name: 'billers'
+      })
+    },
+    submitFeedback () {
+      this.createFeedback({
+        unit_id: this.unitId,
+        account_id: this.account.id,
+        message: this.message
+      }).then(() => {
+        this.setFeedbackDialog(false)
+        this.finishTransaction()
+        this.$router.push({
+          name: 'billers'
+        })
+        Notify.create({
+          position: 'top',
+          type: 'positive',
+          message: 'Thanks for submitting feedback.'
+        })
       })
     }
   },
