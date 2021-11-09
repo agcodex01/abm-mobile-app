@@ -21,12 +21,17 @@ export default {
     insertingPayment: false,
     transactionDialog: false,
     creatingTransaction: false,
-    logs: JSON.parse(LocalStorage.getItem('transactionLogs') || '[]'),
+    logs: [],
     tableHeader: tableHeader
   }),
   getters: {
     getTransaction: state => state.transaction,
-    getLogs: state => state.logs,
+    getLogs: state => {
+      if (state.logs.length < 1) {
+        return JSON.parse(LocalStorage.getItem('transactionLogs') || '[]')
+      }
+      return state.logs
+    },
     getBillerName: state => state.biller_name,
     getInsertedPayment: state => state.transaction.insertedAmount,
     getInsertedAmount: state => state.transaction.amount,
@@ -53,10 +58,11 @@ export default {
     SET_TRANSACTION_LOGS: async ({ commit }, transactionLogs) => {
       const logs = JSON.parse(LocalStorage.getItem('transactionLogs') || '[]')
       logs.push(transactionLogs)
+      LocalStorage.set('transactionLogs', JSON.stringify(logs))
       commit('SET_TRANSACTION_LOGS', logs)
     },
     ADD_PAYMENT: async ({ commit, getters, dispatch }, amount) => {
-      const newAmount = getters.getInsertedPayment + amount
+      const newAmount = parseFloat(getters.getInsertedPayment) + parseFloat(amount)
       commit('SET_INSERTING_STATUS', true)
       setTimeout(() => {
         commit('SET_INSERTING_STATUS', false)
@@ -117,7 +123,7 @@ export default {
       state.creatingTransaction = status
     },
     SET_TRANSACTION_LOGS: (state, logs) => {
-      LocalStorage.set('transactionLogs', JSON.stringify(logs))
+      state.logs = logs
     }
   }
 }

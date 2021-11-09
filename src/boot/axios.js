@@ -46,7 +46,14 @@ api.interceptors.response.use(function (response) {
       Notify.create({
         position: 'top',
         type: 'negative',
-        message: 'Something went wrong.'
+        message: 'Resource not found.'
+      })
+      break
+    case 500:
+      Notify.create({
+        position: 'top',
+        type: 'negative',
+        message: 'Internal server error.'
       })
   }
   // Any status codes that falls outside the range of 2xx cause this function to trigger
