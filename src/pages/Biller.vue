@@ -16,16 +16,20 @@
          />
           <q-input
         v-model="transaction.number"
-        type="number" label="Phone Number"
+        type="text"
+        label="Phone Number"
         outlined
-        :rules="[ val => val && val.length > 0 || 'Phone number is required.']"
+        :rules="[
+          val => val && val.length > 0 || 'Phone number is required.',
+          val => (val.match('^(09|\\+639)\\d{9}$')) || 'Invalid phone number.'
+        ]"
          />
          <q-input
         v-model="transaction.amount"
         type="number"
         label="Amount"
         outlined
-        :rules="[ val => val && val > 99 || 'Invalid amount. Should be greather than 100']"
+        :rules="[ val => val && val > 99 || 'Invalid amount. Should be greater than 100']"
          />
       <div>
         <q-btn label="Confirm" padding="md sm" type="submit"  color="primary" class="full-width btn-submit"/>

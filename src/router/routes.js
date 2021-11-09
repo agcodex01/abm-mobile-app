@@ -34,7 +34,8 @@ const routes = [
         path: '',
         name: 'options',
         meta: {
-          redirectTo: 'landing_page'
+          redirectTo: 'landing_page',
+          requireAuth: true
         },
         component: () => import('pages/setup/Options.vue')
       },
@@ -42,17 +43,19 @@ const routes = [
         path: 'options/config',
         name: 'set_device_config',
         meta: {
-          redirectTo: 'options'
+          redirectTo: 'options',
+          requireAuth: true
         },
         component: () => import('src/pages/setup/Config.vue')
       },
       {
-        path: 'transaction/history_logs',
+        path: 'options/transactions/logs',
         name: 'view_transaction_logs',
         meta: {
-          redirectTo: 'options'
+          redirectTo: 'options',
+          requireAuth: true
         },
-        component: () => import('pages/transaction_logs/HistoryLogs.vue')
+        component: () => import('src/pages/setup/TransactionLogs.vue')
       }
     ]
   },
