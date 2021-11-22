@@ -1,6 +1,15 @@
 <template>
   <q-page padding class="q-mx-auto q-mt-none" style="width:700px; heigth:100%">
-    <div class="text-center">
+    <div v-if="fetching" class="text-center">
+      <h4>Fetching...</h4>
+      <q-skeleton type="rect" height="60px" class="q-mb-md" v-for="n in 4" :key="n" />
+    </div>
+    <div v-else-if="!fetching && !biller">
+      <q-btn color="primary" icon="check" label="OK" :to="{name: 'billers'}" />
+      <h4>Service unavailable.</h4>
+    </div>
+    <div v-else>
+      <div class="text-center">
       <h4 class="title">Payments Requirement</h4>
       <h6>Transaction Fee : P {{ setting?.fee }}</h6>
     </div>
@@ -29,19 +38,20 @@
         type="number"
         label="Amount"
         outlined
-        :rules="[ val => val && val > 99 || 'Invalid amount. Should be greater than 100']"
+        :rules="[ val => val && val > 99 || 'The amount field should atleast 100']"
          />
       <div>
         <q-btn label="Confirm" padding="md sm" type="submit"  color="primary" class="full-width btn-submit"/>
       </div>
     </q-form>
+    </div>
     <q-dialog v-model="askDialog">
       <q-card class="q-pb-lg q-pt-sm" style="width:400px;">
         <q-card-section class="text-center q-pa-none">
           <h5>Do you want to continue?</h5>
         </q-card-section>
         <q-card-actions class="q-pa-none q-mb-md row justify-evenly">
-          <q-btn class="app-dialog-button-padding btn-rounded"  outline label="No" padding="sm xl" color="primary" v-close-popup />
+          <q-btn class="app-dialog-button-padding btn-rounded"  outline label="No" padding="sm xl" color="primary" @click="cancel" />
           <q-btn class="app-dialog-button-padding btn-rounded" label="Yes" padding="sm xl" color="primary" @click="onYes" />
         </q-card-actions>
       </q-card>
@@ -49,7 +59,7 @@
     <q-dialog v-model="transactionDialog" persistent>
       <q-card class="q-pb-lg q-pt-sm" style="width:400px;">
         <q-card-section class="q-pa-none">
-          <h5 align="center" v-if="isCreatingTransaction">Transaction Inprogress.</h5>
+          <h5 align="center" v-if="isCreatingTransaction">Transaction In Progress.</h5>
           <h5 align="center" v-else>Transaction Completed.</h5>
           <div class="q-px-lg">
             <div class="row">
@@ -167,7 +177,8 @@ export default {
       amount: 0
     },
     usingBalance: false,
-    message: null
+    message: null,
+    fetching: false
   }),
   computed: {
     ...mapGetters({
@@ -191,18 +202,22 @@ export default {
       finishTransaction: 'transactions/FINISH_TRANSACTION',
       confirm: 'transactions/CONFIRM',
       setFeedbackDialog: 'feedbacks/SET_DIALOG_STATE',
-      createFeedback: 'feedbacks/CREATE_FEEDBACK'
+      createFeedback: 'feedbacks/CREATE_FEEDBACK',
+      cancel: 'transactions/CANCEL'
     }),
     async onYes () {
       this.$store.commit('transactions/SET_ASK_DIALOG_STATUS', false)
       await this.$store.dispatch('accounts/GET_ACCOUNT_OR_CREATE', {
         biller_id: this.biller.id,
         service_number: this.transaction.service_number
-      }).then(() => {
-        this.transaction.account_id = this.account.id
-        this.transaction.amount = parseFloat(this.transaction.amount) + parseFloat(this.setting.fee)
-        this.$store.commit('transactions/SET_TRANSACTION_INFO', this.transaction)
-        this.$store.commit('transactions/SET_PAYMENT_DIALOG_STATUS', true)
+      }).then((response) => {
+        console.log(response)
+        if (response) {
+          this.transaction.account_id = this.account.id
+          this.transaction.amount = parseFloat(this.transaction.amount) + parseFloat(this.setting.fee)
+          this.$store.commit('transactions/SET_TRANSACTION_INFO', this.transaction)
+          this.$store.commit('transactions/SET_PAYMENT_DIALOG_STATUS', true)
+        }
       })
     },
     async onUseAccountBalance () {
@@ -243,12 +258,16 @@ export default {
     }
   },
   async mounted () {
-    await this.$store.dispatch('billers/getBillerById', this.$route.params.id)
-    await this.$store.dispatch('settings/getSetting')
-    this.$store.commit('layout/SET_HEADER', this.biller.name)
-    this.transaction.unit_id = this.unitId
-    this.transaction.biller_id = this.biller.id
-    this.transaction.biller_name = this.biller.name
+    this.fetching = true
+    try {
+      await this.$store.dispatch('billers/getBillerById', this.$route.params.id)
+      await this.$store.dispatch('settings/getSetting')
+      this.$store.commit('layout/SET_HEADER', this.biller.name)
+      this.transaction.unit_id = this.unitId
+      this.transaction.biller_id = this.biller.id
+      this.transaction.biller_name = this.biller.name
+    } catch (error) {}
+    this.fetching = false
   }
 }
 </script>

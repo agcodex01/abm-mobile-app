@@ -35,7 +35,7 @@ export default {
     })
   },
   mounted () {
-    this.$store.commit('layout/SET_HEADER', 'History Logs')
+    this.$store.commit('layout/SET_HEADER', 'History')
   },
   methods: {
     colorSetter (status) {

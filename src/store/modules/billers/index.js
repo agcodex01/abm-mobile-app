@@ -18,6 +18,7 @@ export default {
   },
   actions: {
     getBillers: async ({ commit }) => {
+      commit('SET_BILLERS', [])
       await api.get('/billers').then(({ data }) => {
         commit('SET_BILLERS', data)
       })

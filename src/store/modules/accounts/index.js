@@ -18,11 +18,14 @@ export default {
   },
   actions: {
     GET_ACCOUNT_OR_CREATE: async ({ commit }, account) => {
-      await api.post('/billers/accounts/findOrCreate', account)
-        .then(({ data }) => {
-          commit('SET_ACCOUNT', data)
-        })
-        .catch(errors => console.error(errors))
+      return new Promise((resolve, reject) => {
+        api.post('/billers/accounts/findOrCreate', account)
+          .then(({ data }) => {
+            commit('SET_ACCOUNT', data)
+            resolve(data)
+          })
+          .catch(errors => reject(errors))
+      })
     },
     USE_ACCOUNT_BALANCE: async (context, accountId) => {
       return new Promise((resolve, reject) => {

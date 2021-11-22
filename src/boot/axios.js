@@ -27,6 +27,14 @@ api.interceptors.response.use(function (response) {
   // Do something with response data
   return response
 }, function (error) {
+  if (!error.response) {
+    Notify.create({
+      position: 'top',
+      type: 'negative',
+      message: 'Server not reachable.'
+    })
+    return Promise.reject(error)
+  }
   switch (error.response.status) {
     case 401:
       Notify.create({
