@@ -59,6 +59,7 @@ export default {
   async mounted () {
     this.$store.commit('layout/SET_HEADER', 'Billers')
     this.$q.loading.show()
+    this.$store.commit('billers/SET_BILLER_SEARCH', '')
     await this.$store.dispatch('billers/getBillers')
       .finally(() => {
         this.$q.loading.hide()

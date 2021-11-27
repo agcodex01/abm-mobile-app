@@ -46,13 +46,41 @@
     </q-form>
     </div>
     <q-dialog v-model="askDialog">
-      <q-card class="q-pb-lg q-pt-sm" style="width:400px;">
-        <q-card-section class="text-center q-pa-none">
-          <h5>Do you want to continue?</h5>
+      <q-card class="q-pb-lg q-pt-lg" style="width:400px;">
+        <q-card-section class="q-mb-md">
+          <h5 class="text-center q-mt-none">Transaction Preview.</h5>
+          <div class="q-px-lg">
+            <div class="row">
+            <div class="col-4">
+              <div class="text-subtitle2">Biller</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: {{ biller?.name }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Service #</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: {{ transaction?.service_number }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Phone #</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: {{ transaction?.number }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Amount</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: {{ transaction.amount }}</div>
+            </div>
+          </div>
+          </div>
         </q-card-section>
         <q-card-actions class="q-pa-none q-mb-md row justify-evenly">
           <q-btn class="app-dialog-button-padding btn-rounded"  outline label="No" padding="sm xl" color="primary" @click="cancel" />
-          <q-btn class="app-dialog-button-padding btn-rounded" label="Yes" padding="sm xl" color="primary" @click="onYes" />
+          <q-btn class="app-dialog-button-padding btn-rounded" label="Continue" padding="sm xl" color="primary" @click="onYes" />
         </q-card-actions>
       </q-card>
     </q-dialog>
