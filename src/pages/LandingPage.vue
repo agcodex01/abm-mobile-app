@@ -1,5 +1,5 @@
 <template>
-  <div class="fullscreen bg-primary text-white  q-pa-md flex flex-center">
+  <div class="fullscreen bg-primary text-white flex flex-center">
     <div class="fixed-top">
       <q-list bordered>
          <q-item class="q-pa-lg">
@@ -32,6 +32,9 @@
         <div class="text-h4 text-weight-bold">Pay Bills</div>
       </q-card-section>
     </q-card>
+    <div class="fixed-bottom text-center">
+      <p>© 2021 Adopisoft. All rights reserved</p>
+    </div>
     <q-dialog v-model="loginDialog" persistent>
       <q-card style="width:30%">
         <q-card-section class="text-center">
@@ -85,9 +88,11 @@
 <script>
 import { Notify } from 'quasar'
 import { mapActions, mapGetters } from 'vuex'
+
 export default {
   name: 'LandingPage',
   data: () => ({
+    footer: true,
     loginDialog: false,
     credentials: {
       email: null,
