@@ -9,6 +9,7 @@
           icon="chevron_left"
           aria-label="Menu"
           @click="redirectTo"
+          v-if="$route.name !== 'options'"
         />
         <q-toolbar-title v-text="header" />
       </q-toolbar>

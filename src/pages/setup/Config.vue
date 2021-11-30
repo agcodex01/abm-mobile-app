@@ -61,9 +61,10 @@ export default {
     },
     onReset () {
       this.unitId = ''
+      this.token = ''
       this.setConfig({
-        unitId: null,
-        token: null
+        unitId: '',
+        token: ''
       })
     }
   },

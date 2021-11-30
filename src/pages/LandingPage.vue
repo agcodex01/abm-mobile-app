@@ -45,6 +45,7 @@
               label="Email"
               dense
               outlined
+              autocomplete="false"
               hint="Portal email credential."
               :error="authErrors.email.error"
               :error-message="authErrors.email.message"
@@ -58,6 +59,8 @@
             label="Password"
             dense
             outlined
+            autocomplete="false"
+            aria-autocomplete="false"
             :error="authErrors.password.error"
             :error-message="authErrors.password.message"
             :rules="[

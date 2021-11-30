@@ -89,6 +89,9 @@ export default {
     },
     CONFIRM: ({ commit }) => {
       commit('SET_ASK_DIALOG_STATUS', true)
+    },
+    CANCEL: ({ commit }) => {
+      commit('SET_ASK_DIALOG_STATUS', false)
     }
   },
   mutations: {

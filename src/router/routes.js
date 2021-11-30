@@ -49,13 +49,13 @@ const routes = [
         component: () => import('src/pages/setup/Config.vue')
       },
       {
-        path: 'options/transactions/logs',
+        path: 'options/history/transactions',
         name: 'view_transaction_logs',
         meta: {
           redirectTo: 'options',
           requireAuth: true
         },
-        component: () => import('src/pages/setup/TransactionLogs.vue')
+        component: () => import('src/pages/setup/History.vue')
       }
     ]
   },
