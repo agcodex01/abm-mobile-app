@@ -22,7 +22,9 @@ export default {
     transactionDialog: false,
     creatingTransaction: false,
     logs: [],
-    tableHeader: tableHeader
+    tableHeader: tableHeader,
+    serviceNotAvailable: false,
+    cancelTransactionLoading: false
   }),
   getters: {
     getTransaction: state => state.transaction,
@@ -41,18 +43,24 @@ export default {
     openAskDialog: state => state.askDialog,
     openTransactionDialog: state => state.transactionDialog,
     isCreatingTransaction: state => state.creatingTransaction,
-    getTableHeader: state => state.tableHeader
+    getTableHeader: state => state.tableHeader,
+    getServiceNotAvailable: state => state.serviceNotAvailable,
+    getCancelTransactionLoading: state => state.cancelTransactionLoading
   },
   actions: {
-    CREATE_TRANSACTION: async ({ commit, dispatch, getters }, transaction) => {
+    CREATE_TRANSACTION: async ({ commit, dispatch, getters, rootGetters }, transactionData) => {
       dispatch('OPEN_TRANSACTION_DIALOG')
+      const transaction = Object.assign({}, transactionData)
+      transaction.amount = parseFloat(transaction.amount) + parseFloat(rootGetters['settings/getSetting'].fee)
       await api.post(`/units/${transaction.unit_id}/transactions`, transaction)
         .then(({ data }) => {
-          commit('SET_TRANSACTION_CREATING_STATUS', false)
           commit('SET_TRANSACTION', { ...data, insertedAmount: getters.getInsertedPayment })
           dispatch('SET_TRANSACTION_LOGS', { ...data, biller_name: getters.getBillerName, status: 'Success' })
         }).catch(() => {
+          commit('SET_SERVICE_NOT_AVAIALABLE', true)
           dispatch('SET_TRANSACTION_LOGS', { ...transaction, biller_name: getters.getBillerName, status: 'Failed' })
+        }).finally(() => {
+          commit('SET_TRANSACTION_CREATING_STATUS', false)
         })
     },
     SET_TRANSACTION_LOGS: async ({ commit }, transactionLogs) => {
@@ -61,13 +69,17 @@ export default {
       LocalStorage.set('transactionLogs', JSON.stringify(logs))
       commit('SET_TRANSACTION_LOGS', logs)
     },
-    ADD_PAYMENT: async ({ commit, getters, dispatch }, amount) => {
+    ADD_PAYMENT: async ({ commit, getters, dispatch, rootGetters }, amount) => {
       const newAmount = parseFloat(getters.getInsertedPayment) + parseFloat(amount)
       commit('SET_INSERTING_STATUS', true)
       setTimeout(() => {
         commit('SET_INSERTING_STATUS', false)
         commit('SET_PAYMENT', newAmount)
+        const total = parseInt(getters.getTransaction.amount) + parseInt(rootGetters['settings/getSetting'].fee)
         if (getters.canCreate) {
+          if (parseInt(getters.getTransaction.insertedAmount) > total) {
+            commit('accounts/SET_ACCOUNT_BALANCE', (parseInt(getters.getTransaction.insertedAmount) - total), { root: true })
+          }
           dispatch(
             'CREATE_TRANSACTION',
             {
@@ -92,6 +104,21 @@ export default {
     },
     CANCEL: ({ commit }) => {
       commit('SET_ASK_DIALOG_STATUS', false)
+    },
+    CANCEL_TRANSACTION: async ({ commit, dispatch, getters }, transaction) => {
+      commit('SET_CANCEL_TRANSACTION_LOADING', true)
+      await api.post(`/units/${transaction.unit_id}/accounts/${transaction.account_id}/cancelTransaction`, transaction)
+        .then(({ data }) => {
+          commit('SET_TRANSACTION_CREATING_STATUS', false)
+          commit('SET_TRANSACTION', { ...data, insertedAmount: getters.getInsertedPayment })
+          dispatch('SET_TRANSACTION_LOGS', { ...data, biller_name: getters.getBillerName, status: 'Cancel' })
+        }).catch(() => {
+          dispatch('SET_TRANSACTION_LOGS', { ...transaction, biller_name: getters.getBillerName, status: 'Failed' })
+        }).finally(() => commit('SET_CANCEL_TRANSACTION_LOADING', false))
+    },
+    CANCEL_TRANSACTION_MODAL: ({ commit }) => {
+      commit('SET_ASK_DIALOG_STATUS', false)
+      commit('SET_PAYMENT_DIALOG_STATUS', false)
     }
   },
   mutations: {
@@ -127,6 +154,12 @@ export default {
     },
     SET_TRANSACTION_LOGS: (state, logs) => {
       state.logs = logs
+    },
+    SET_SERVICE_NOT_AVAIALABLE: (state, isServiceNotAvailable) => {
+      state.serviceNotAvailable = isServiceNotAvailable
+    },
+    SET_CANCEL_TRANSACTION_LOADING: (state, isLoading) => {
+      state.cancelTransactionLoading = isLoading
     }
   }
 }

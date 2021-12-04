@@ -53,6 +53,7 @@ export default {
         unitId: this.unitId,
         token: this.token
       })
+      this.$socket.emit('join room', this.unitId)
       this.$q.notify({
         position: 'top',
         type: 'positive',

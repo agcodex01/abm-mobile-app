@@ -12,8 +12,8 @@ export default {
     SET_ACCOUNT: (state, account) => {
       state.account = account
     },
-    RESET_ACCOUNT_BALANCE: (state) => {
-      state.account.balance = 0
+    SET_ACCOUNT_BALANCE: (state, amount) => {
+      state.account.balance = amount
     }
   },
   actions: {

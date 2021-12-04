@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-xl">
+  <q-page class="q-pa-md">
     <q-input
       v-model="billerSearch"
       type="search"
