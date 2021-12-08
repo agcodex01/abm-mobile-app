@@ -307,7 +307,7 @@ export default {
       this.usingBalance = true
       let insertFromBalance = 0
       const total = parseInt(this.transaction.amount) + parseInt(this.setting.fee)
-      if (this.account.balance >= this.transaction.amount) {
+      if (this.account.balance >= total) {
         this.$store.commit('accounts/SET_ACCOUNT_BALANCE', parseInt(this.account.balance) - total)
         insertFromBalance = total
       } else {
@@ -357,6 +357,7 @@ export default {
         type: 'positive',
         message: 'Cancelling transaction done.'
       })
+      this.$store('transactions/SET_PAYMENT', 0)
       this.$router.push({
         name: 'billers'
       })

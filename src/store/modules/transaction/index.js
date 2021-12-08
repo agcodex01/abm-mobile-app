@@ -76,7 +76,7 @@ export default {
         commit('SET_INSERTING_STATUS', false)
         commit('SET_PAYMENT', newAmount)
         const total = parseInt(getters.getTransaction.amount) + parseInt(rootGetters['settings/getSetting'].fee)
-        if (getters.canCreate) {
+        if (parseInt(getters.getTransaction.insertedAmount) >= total) {
           if (parseInt(getters.getTransaction.insertedAmount) > total) {
             commit('accounts/SET_ACCOUNT_BALANCE', (parseInt(getters.getTransaction.insertedAmount) - total), { root: true })
           }
