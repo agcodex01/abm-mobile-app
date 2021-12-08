@@ -1,18 +1,15 @@
 <template>
-  <q-page padding class="q-mx-auto q-mt-none" style="width:700px; heigth:100%">
+  <q-page padding class="q-mx-auto q-mt-none">
     <div v-if="fetching" class="text-center">
       <h4>Fetching...</h4>
       <q-skeleton type="rect" height="60px" class="q-mb-md" v-for="n in 4" :key="n" />
     </div>
     <div v-else-if="!fetching && !biller">
-      <q-btn color="primary" icon="check" label="OK" :to="{name: 'billers'}" />
+      <q-btn color="primary" label="Back to billers" :to="{name: 'billers'}" />
       <h4>Service unavailable.</h4>
     </div>
     <div v-else>
-      <div class="text-center">
-      <h4 class="title">Payments Requirement</h4>
-      <h6>Transaction Fee : P {{ setting?.fee }}</h6>
-    </div>
+      <h6 class="text-center">Transaction Fee : ₱ {{ setting?.fee }}</h6>
     <q-form
       @submit="confirm"
       class="q-gutter-md"
@@ -24,31 +21,31 @@
         :rules="[ val => val && val.length > 0 || 'Service number is required.']"
          />
           <q-input
-        v-model="transaction.number"
-        type="text"
-        label="Phone Number"
-        outlined
-        :rules="[
-          val => val && val.length > 0 || 'Phone number is required.',
-          val => (val.match('^(09|\\+639)\\d{9}$')) || 'Invalid phone number.'
-        ]"
-         />
+            v-model="transaction.number"
+            type="number"
+            label="Phone Number"
+            outlined
+            :rules="[
+              val => val && val.length > 0 || 'Phone number is required.',
+              val => (val.match('^(09|\\+639)\\d{9}$')) || 'Invalid phone number.'
+            ]"
+          />
          <q-input
-        v-model="transaction.amount"
-        type="number"
-        label="Amount"
-        outlined
-        :rules="[ val => val && val > 99 || 'The amount field should atleast 100']"
-         />
+            v-model="transaction.amount"
+            type="number"
+            label="Amount"
+            outlined
+            :rules="[ val => val && val > 99 || 'The amount field should atleast 100']"
+          />
       <div>
         <q-btn label="Confirm" padding="md sm" type="submit"  color="primary" class="full-width btn-submit"/>
       </div>
     </q-form>
     </div>
     <q-dialog v-model="askDialog">
-      <q-card class="q-pb-lg q-pt-lg" style="width:400px;">
+      <q-card class="q-pb-lg" style="width:400px;">
         <q-card-section class="q-mb-md">
-          <h5 class="text-center q-mt-none">Transaction Preview.</h5>
+          <p class="text-center text-subtitle1 text-weight-bold q-mt-none">Transaction Preview.</p>
           <div class="q-px-lg">
             <div class="row">
             <div class="col-4">
@@ -58,7 +55,7 @@
               <div class="text-subtitle2">: {{ biller?.name }}</div>
             </div>
             <div class="col-4">
-              <div class="text-subtitle2">Service #</div>
+              <div class="text-subtitle2">Account #</div>
             </div>
             <div class="col-8">
               <div class="text-subtitle2">: {{ transaction?.service_number }}</div>
@@ -73,22 +70,35 @@
               <div class="text-subtitle2">Amount</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ transaction.amount }}</div>
+              <div class="text-subtitle2">: ₱ {{ transaction.amount }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Fee</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: ₱ {{ setting.fee }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Total</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: ₱ {{ getTotal }}</div>
             </div>
           </div>
           </div>
         </q-card-section>
-        <q-card-actions class="q-pa-none q-mb-md row justify-evenly">
-          <q-btn class="app-dialog-button-padding btn-rounded"  outline label="No" padding="sm xl" color="primary" @click="cancel" />
-          <q-btn class="app-dialog-button-padding btn-rounded" label="Continue" padding="sm xl" color="primary" @click="onYes" />
+        <q-card-actions class="q-pa-none row justify-evenly">
+          <q-btn class="btn-rounded"  outline label="No" padding="sm xl" color="primary" @click="cancel" />
+          <q-btn class="btn-rounded" label="Continue" padding="sm xl" color="primary" @click="onYes" />
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="transactionDialog" persistent>
-      <q-card class="q-pb-lg q-pt-sm" style="width:400px;">
+      <q-card class="q-pb-lg q-pt-none" style="width:400px;">
         <q-card-section class="q-pa-none">
-          <h5 align="center" v-if="isCreatingTransaction">Transaction In Progress.</h5>
-          <h5 align="center" v-else>Transaction Completed.</h5>
+          <h6 class="text-center q-my-md" v-if="isCreatingTransaction && !serviceNotAvailable">Transaction In Progress.</h6>
+          <h6 class="text-center q-my-md" v-else-if="!isCreatingTransaction && serviceNotAvailable">Transaction In Progress.</h6>
+          <h6 class="text-center q-my-md" v-else>Transaction Completed.</h6>
           <div class="q-px-lg">
             <div class="row">
             <div class="col-4">
@@ -98,13 +108,19 @@
               <div class="text-subtitle2">: {{ biller?.name }}</div>
             </div>
             <div class="col-4">
-              <div class="text-subtitle2">Service Number</div>
+              <div class="text-subtitle2">Account #</div>
             </div>
             <div class="col-8">
               <div class="text-subtitle2">: {{ transaction?.service_number }}</div>
             </div>
             <div class="col-4">
-              <div class="text-subtitle2">Phone Number</div>
+              <div class="text-subtitle2">Balance</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: ₱ {{ account?.balance }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Phone #</div>
             </div>
             <div class="col-8">
               <div class="text-subtitle2">: {{ transaction?.number }}</div>
@@ -113,13 +129,25 @@
               <div class="text-subtitle2">Amount</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ amount }}</div>
+              <div class="text-subtitle2">: ₱ {{ transaction.amount }}</div>
             </div>
             <div class="col-4">
               <div class="text-subtitle2">Payment Inserted</div>
             </div>
             <div class="col-8">
-              <div class="text-subtitle2">: {{ insertedPayment }}</div>
+              <div class="text-subtitle2">: ₱ {{ insertedPayment }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Fee</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: ₱ {{ setting.fee }}</div>
+            </div>
+            <div class="col-4">
+              <div class="text-subtitle2">Total</div>
+            </div>
+            <div class="col-8">
+              <div class="text-subtitle2">: ₱ {{ getTotal }}</div>
             </div>
           </div>
           </div>
@@ -128,7 +156,12 @@
           <q-spinner-ios color="primary" size="3em"/>
            <p>Creating transaction in progress...</p>
         </q-card-section>
-        <q-card-section class="text-center" v-show="!isCreatingTransaction">
+        <q-card-section class="text-center" v-show="!isCreatingTransaction && serviceNotAvailable">
+           <p class="text-subtitle2">Transaction Failed</p>
+           <q-btn color="primary" outline label="Retry" class="full-width" @click="retryTransaction" />
+           <q-btn color="primary" label="Back to billers" class="full-width q-mt-sm" :to="{name: 'billers'}" />
+        </q-card-section>
+        <q-card-section class="text-center" v-show="!isCreatingTransaction && !serviceNotAvailable">
           <q-icon name="task_alt" size="64px" color="positive" />
           <p class="q-mt-md">Sms message will be sent to your mobile number for confirmation.</p>
           <q-btn color="positive" label="Send Feedback" class="full-width q-mb-sm" outline @click="setFeedbackDialog(true)"/>
@@ -137,23 +170,22 @@
       </q-card>
     </q-dialog>
     <q-dialog v-model="paymentDialog" persistent >
-      <q-card class="q-px-lg q-pb-lg" style="min-width:640px">
-        <q-card-section class="q-pt-lg flex justify-between align-center">
-          <div class="text-h5 text-weight-regular no-margin">Insert Payment</div>
-          <q-btn v-if="account?.balance" color="primary" label="Use balance" :loading="usingBalance" @click="onUseAccountBalance"/>
+      <q-card class="q-px-lg q-pb-lg">
+        <q-card-section class="q-pt-lg">
+          <div class="text-h5 text-weight-regular no-margin text-center">Insert Payment</div>
         </q-card-section>
         <q-card-section class="row">
           <div class="col-4 text-center">
              <div class="text-h6 q-mb-md">Amount </div>
-             <div class="text-subtitle1" style="font-size:24px"> {{ transaction.amount || 0 }} </div>
+             <div class="text-subtitle1" style="font-size:24px">₱ {{ getTotal|| 0 }} </div>
           </div>
           <div class="col-4 text-center">
              <div class="text-h6 q-mb-md">Balance </div>
-             <div class="text-subtitle1 q-mb-md" style="font-size:24px"> {{ account.balance || 0 }} </div>
+             <div class="text-subtitle1 q-mb-md" style="font-size:24px">₱ {{ account.balance || 0 }} </div>
           </div>
           <div class="col-4 text-center">
              <div class="text-h6 q-mb-md">Payment </div>
-             <div class="text-subtitle1" style="font-size:24px"> {{ insertedPayment }} </div>
+             <div class="text-subtitle1" style="font-size:24px">₱ {{ insertedPayment }} </div>
           </div>
           <div class="col-12 q-mt-lg">
             <div class="text-center q-mb-lg" v-show="isInsertingPayment">
@@ -161,11 +193,12 @@
                 <p>Inserting payment in progress...</p>
             </div>
           </div>
+          <q-btn color="negative" outline label="Cancel" class="full-width" @click="cancelTransactionOptionFn" />
         </q-card-section>
       </q-card>
     </q-dialog>
     <q-dialog v-model="feedbackDialog" persistent >
-      <q-card class="q-px-lg q-pb-lg" style="min-width:640px">
+      <q-card class="q-pb-lg">
         <q-card-section class="q-pt-lg flex justify-between align-center">
           <div class="text-h5 text-weight-regular no-margin">Feedback</div>
         </q-card-section>
@@ -187,6 +220,20 @@
          </q-form>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="cancelTransactionDialog" persistent >
+      <q-card class="q-pb-lg">
+        <q-card-section class="q-pt-lg flex justify-between align-center">
+          <div class="text-h5 text-weight-regular no-margin">Cancel Transaction</div>
+        </q-card-section>
+        <q-card-section>
+          Are you sure you want to cancel transaction ? The inserted money will become your balance in the selected biller.
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn color="primary" outline label="Close" padding="sm lg" @click="cancelTransactionDialog = false"/>
+          <q-btn color="primary" :loading="isCancelTransactionLoading" label="Continue" padding="sm lg" @click="cancelTransactionFn"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 <script>
@@ -202,11 +249,13 @@ export default {
       account_id: null,
       service_number: null,
       number: null,
-      amount: 0
+      amount: 100,
+      status: 'pending'
     },
     usingBalance: false,
     message: null,
-    fetching: false
+    fetching: false,
+    cancelTransactionDialog: false
   }),
   computed: {
     ...mapGetters({
@@ -221,8 +270,14 @@ export default {
       askDialog: 'transactions/openAskDialog',
       transactionDialog: 'transactions/openTransactionDialog',
       isCreatingTransaction: 'transactions/isCreatingTransaction',
-      feedbackDialog: 'feedbacks/getDialogState'
-    })
+      feedbackDialog: 'feedbacks/getDialogState',
+      serviceNotAvailable: 'transactions/getServiceNotAvailable',
+      isCancelTransactionLoading: 'transactions/getCancelTransactionLoading',
+      transactionData: 'transactions/getTransaction'
+    }),
+    getTotal () {
+      return parseInt(this.setting.fee) + parseInt(this.transaction.amount)
+    }
   },
   methods: {
     ...mapActions({
@@ -231,7 +286,8 @@ export default {
       confirm: 'transactions/CONFIRM',
       setFeedbackDialog: 'feedbacks/SET_DIALOG_STATE',
       createFeedback: 'feedbacks/CREATE_FEEDBACK',
-      cancel: 'transactions/CANCEL'
+      cancel: 'transactions/CANCEL',
+      cancelTransaction: 'transactions/CANCEL_TRANSACTION'
     }),
     async onYes () {
       this.$store.commit('transactions/SET_ASK_DIALOG_STATUS', false)
@@ -239,26 +295,27 @@ export default {
         biller_id: this.biller.id,
         service_number: this.transaction.service_number
       }).then((response) => {
-        console.log(response)
         if (response) {
           this.transaction.account_id = this.account.id
-          this.transaction.amount = parseFloat(this.transaction.amount) + parseFloat(this.setting.fee)
           this.$store.commit('transactions/SET_TRANSACTION_INFO', this.transaction)
           this.$store.commit('transactions/SET_PAYMENT_DIALOG_STATUS', true)
+          this.onUseAccountBalance()
         }
       })
     },
     async onUseAccountBalance () {
       this.usingBalance = true
-      await this.useAccountBalance(this.account.id)
-        .then(success => {
-          if (success) {
-            this.$store.dispatch('transactions/ADD_PAYMENT', this.account.balance)
-            this.$store.commit('accounts/RESET_ACCOUNT_BALANCE')
-          }
-        }).finally(() => {
-          this.usingBalance = false
-        })
+      let insertFromBalance = 0
+      const total = parseInt(this.transaction.amount) + parseInt(this.setting.fee)
+      if (this.account.balance >= total) {
+        this.$store.commit('accounts/SET_ACCOUNT_BALANCE', parseInt(this.account.balance) - total)
+        insertFromBalance = total
+      } else {
+        insertFromBalance = parseInt(this.account.balance || 0)
+      }
+
+      this.$store.dispatch('transactions/ADD_PAYMENT', insertFromBalance)
+      this.usingBalance = false
     },
     onFinishTransaction () {
       this.finishTransaction()
@@ -283,11 +340,39 @@ export default {
           message: 'Thanks for submitting feedback.'
         })
       })
+    },
+    cancelTransactionOptionFn () {
+      if (this.insertedPayment > 0) {
+        this.cancelTransactionDialog = true
+      } else {
+        this.$store.dispatch('transactions/CANCEL_TRANSACTION_MODAL')
+      }
+    },
+    async cancelTransactionFn () {
+      this.transaction.status = 'cancelled'
+      this.transaction.insertedAmount = this.insertedPayment
+      await this.cancelTransaction(this.transaction)
+      Notify.create({
+        position: 'top',
+        type: 'positive',
+        message: 'Cancelling transaction done.'
+      })
+      this.$store('transactions/SET_PAYMENT', 0)
+      this.$router.push({
+        name: 'billers'
+      })
+    },
+    async retryTransaction () {
+      this.$store.commit('transactions/SET_SERVICE_NOT_AVAIALABLE', false)
+      this.$store.dispatch('transactions/CREATE_TRANSACTION', this.transactionData)
     }
   },
   async mounted () {
     this.fetching = true
     try {
+      this.finishTransaction()
+      this.$store.dispatch('transactions/CANCEL_TRANSACTION_MODAL')
+      this.$store.commit('transactions/SET_PAYMENT', 0)
       await this.$store.dispatch('billers/getBillerById', this.$route.params.id)
       await this.$store.dispatch('settings/getSetting')
       this.$store.commit('layout/SET_HEADER', this.biller.name)

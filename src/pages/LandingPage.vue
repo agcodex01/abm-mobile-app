@@ -2,43 +2,43 @@
   <div class="fullscreen bg-primary text-white flex flex-center">
     <div class="fixed-top">
       <q-list bordered>
-         <q-item class="q-pa-lg">
+         <q-item class="padding-none">
       <q-item-section avatar>
         <q-avatar>
           <img
             src="~assets/logo.png"
-            width="200px"
-            height="200px"
+            width="50px"
+            height="50px"
           />
         </q-avatar>
       </q-item-section>
       <q-item-section>
-        <q-item-label class="text-weight-bold text-h5 h5">ADOPISOFT</q-item-label>
-        <q-item-label  lines="1" class="text-white text-h6"
+        <q-item-label class="text-weight-bold text-subtitle1">ADOPISOFT</q-item-label>
+        <q-item-label  lines="1" class="text-white text-subtitle2"
           >Billing Machine</q-item-label
         >
       </q-item-section>
       <q-item-section avatar  @click="openLogin">
-          <q-avatar size="96px"  text-color="white" icon="settings" />
+          <q-avatar size="64px"  text-color="white" icon="settings" />
         </q-item-section>
     </q-item>
       </q-list>
     </div>
     <q-card
       class="bg-secondary flex flex-center border-white clickables"
-      style="min-width:200px;min-height:200px"
       @click="gotoBillers">
       <q-card-section class="q-pa-lg">
-        <div class="text-h4 text-weight-bold">Pay Bills</div>
+        <div class="text-h6 text-weight-bold">Pay Bills</div>
       </q-card-section>
     </q-card>
     <div class="fixed-bottom text-center">
       <p>© 2021 Adopisoft. All rights reserved</p>
     </div>
     <q-dialog v-model="loginDialog" persistent>
-      <q-card style="width:30%">
-        <q-card-section class="text-center">
-          <span class="text-h6">Authenticate</span>
+      <q-card style="width:75%">
+        <q-card-section class="flex justify-between align-center">
+          <span class="text-weight-bold">Authenticate</span>
+          <q-btn size="sm" icon="close" flat v-close-popup/>
         </q-card-section>
         <q-card-section>
           <q-form ref="loginForm" class="q-gutter-md">
@@ -72,14 +72,13 @@
           />
           </q-form>
         </q-card-section>
-        <q-card-actions>
+        <q-card-actions class="q-mb-md">
           <q-btn label="Login" color="primary" class="full-width" :loading="loading"  @click="login">
             <template v-slot:loading>
               <q-spinner class="on-left" />
                 Signing In...
             </template>
           </q-btn>
-          <q-btn flat label="Cancel" color="primary" class="full-width" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -123,6 +122,8 @@ export default {
     },
     openLogin () {
       this.loginDialog = true
+      this.credentials.email = null
+      this.credentials.password = null
     },
     login () {
       this.$refs.loginForm.validate().then(async isValid => {
