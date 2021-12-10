@@ -357,7 +357,7 @@ export default {
         type: 'positive',
         message: 'Cancelling transaction done.'
       })
-      this.$store('transactions/SET_PAYMENT', 0)
+      this.$store.commit('transactions/SET_PAYMENT', 0)
       this.$router.push({
         name: 'billers'
       })

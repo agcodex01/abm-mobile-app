@@ -110,8 +110,8 @@ export default {
       await api.post(`/units/${transaction.unit_id}/accounts/${transaction.account_id}/cancelTransaction`, transaction)
         .then(({ data }) => {
           commit('SET_TRANSACTION_CREATING_STATUS', false)
-          commit('SET_TRANSACTION', { ...data, insertedAmount: getters.getInsertedPayment })
-          dispatch('SET_TRANSACTION_LOGS', { ...data, biller_name: getters.getBillerName, status: 'Cancel' })
+          commit('SET_TRANSACTION', { ...transaction, insertedAmount: getters.getInsertedPayment })
+          dispatch('SET_TRANSACTION_LOGS', { ...transaction, biller_name: getters.getBillerName, status: 'Cancel' })
         }).catch(() => {
           dispatch('SET_TRANSACTION_LOGS', { ...transaction, biller_name: getters.getBillerName, status: 'Failed' })
         }).finally(() => commit('SET_CANCEL_TRANSACTION_LOADING', false))
